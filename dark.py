@@ -47,5 +47,5 @@ for search in keyword: #keyword search
                 domain = "http://zlal32teyptf4tvi.onion/?search="+search+"&rep=n%2Fa&page="+str(page)
 		getAllExternalLinks(domain,search)
 		page += 1
-	with open('allExtLinks.json', 'w', encoding="utf-8") as make_file:
-		json.dump(allExtLinks, make_file, ensure_ascii=False, indent="\t")
+with open('allExtLinks.json', 'w', encoding="utf-8") as make_file:
+	json.dump(allExtLinks, make_file, ensure_ascii=False, indent="\t")
