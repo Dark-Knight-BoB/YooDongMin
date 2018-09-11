@@ -29,7 +29,7 @@ def getAllExternalLinks(siteUrl,keyword):
             allExtLinks.setdefault(keyword,[]).append(link)
             print(link)
 
-keyword = [ "northkorea" , "drug"]
+keyword = [ "northkorea" , "drug"] # 검색할 
 
 for search in keyword: #keyword search
 	print("Searching : "+search)
