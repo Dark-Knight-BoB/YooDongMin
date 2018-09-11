@@ -29,7 +29,7 @@ def getAllExternalLinks(siteUrl,keyword):
             allExtLinks.setdefault(keyword,[]).append(link)
             print(link)
 
-keyword = [ "northkorea" , "drug"] # 검색할 
+keyword = [ "northkorea" , "drug"] # 검색할 키워드
 
 for search in keyword: #keyword search
 	print("Searching : "+search)
@@ -49,5 +49,5 @@ for search in keyword: #keyword search
 		page += 1
 		
 		
-with open('allExtLinks.json', 'w', encoding="utf-8") as make_file:
+with open('allExtLinks.json', 'w', encoding="utf-8") as make_file:  # 추출한 URL Json 파일로 저장
 	json.dump(allExtLinks, make_file, ensure_ascii=False, indent="\t")
