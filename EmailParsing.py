@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup as bs
 import requests
 import requests.exceptions
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 from collections import deque
 import re
 
@@ -48,24 +48,24 @@ def EmailParsing(siteURL):
 			if not link in new_urls and not link in processed_urls:
 				new_urls.append(link)
 
-keyword = [ "northkorea" , "drug"]
-
-for search in keyword: #keyword search
-	print("Searching : "+search)
+keyword = [ "northkorea" , "drug","떨이"]
+for search in keyword:
+	print("Searching :"+ search)
 	page = 1
 	req = requests.get("http://zlal32teyptf4tvi.onion/?search="+search+"&rep=n%2Fa&page=1")
 	html = req.text
-	soup = bs(html,'html.parser')
+	soup = bs(html, 'html.parser')
 	content = soup.find_all('div',{'class':'ruler'})
-        if(content):
-            print("PAGE : 1")
-            domain = "http://zlal32teyptf4tvi.onion/?search="+search+"&rep=n%2Fa&page="+str(page)
-            EmailParsing(domain)
-        else:
-            while page < 20: #page loop
-                print("PAGE : "+ str(page) )
-                domain = "http://zlal32teyptf4tvi.onion/?search="+search+"&rep=n%2Fa&page="+str(page)
-                EmailParsing(domain)
-                page += 1
+	if(content):
+		print("PAGE : 1")
+		domain = "http://zlal32teyptf4tvi.onion/?search="+search+"&rep=n%2Fa&page="+str(page)
+		EmailParsing(domain)
+	else:
+		while page < 20:
+			print("PAGE : "+str(page))
+			domain = "http://zlal32teyptf4tvi.onion/?search="+search+"&rep=n%2Fa&page="+str(page)
+			EmailParsing(domain)
+			page += 1
 	
+
 				
