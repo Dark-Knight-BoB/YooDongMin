@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup as bs
-from collections import OrderedDict
-from pyvirtualdisplay import Display
-from selenium import webdriver
+#from collections import OrderedDict
+#from pyvirtualdisplay import Display
+#from selenium import webdriver
 import Crawler as cr
 agora='http://c2djzrn6qx6kupkn.onion/'
 
