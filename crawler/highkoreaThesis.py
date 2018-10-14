@@ -7,25 +7,33 @@ import re
 loginPage = 'http://highkorea5ou4wcy.onion/ucp.php?mode=login'
 ID = 'michin'
 passwd = 'michin'
-highkorea='http://highkorea5ou4wcy.onion'
+highkoreaURL='http://highkorea5ou4wcy.onion'
 
 LOGIN_INFO = {
     'username' : ID,
     'password' : passwd
 }
 sIDpat= re.compile('sid=(.*?);')
+
 with requests.session() as s:
-    s.proxies = {}
-    s.proxies['http'] = 'socks5h://localhost:9050'
-    s.proxies['https'] = 'socks5h://localhost:9050'
+    highkorea = cr.Site(highkoreaURL)
+    s, soup = highkorea.staticGet(s, loginPage)[0], highkorea.staticGet(s, loginPage)[2]
 
-    r = s.get(loginPage)
+    # Login
+    sid = soup.find('input', {'name': 'sid'})
+    redirect = soup.find('input', {'name': 'redirect'})
+    login = soup.find('input', {'name': 'login'})
+    LOGIN_INFO = dict(LOGIN_INFO, **{'sid': sid['value']})
+    LOGIN_INFO = dict(LOGIN_INFO, **{'redirect': redirect['value']})
+    LOGIN_INFO = dict(LOGIN_INFO, **{'login': login['value']})
+    s = highkorea.staticPost(s, loginPage, LOGIN_INFO)[0]
 
-    html = r.text
+    # Main Page
+    s, soup = highkorea.staticGet(s, highkorea.stem)[0], highkorea.staticGet(s, highkorea.stem)[2]
+    mainCategory = soup.find_all("a", {"class": "forumtitle"})
+    for category in mainCategory:
+        print("Forum : {}".format(category.text))
 
-    soup = bs(html, 'html.parser')
-
-    sid = soup.find('input', {'name':'sid'}).get('value')
 '''
     LOGIN_INFO['sid'] = sid
 
