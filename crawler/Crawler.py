@@ -73,6 +73,6 @@ def staticPost(url, data):
     return s, soup
 
 
-def mkjson(path, data, filename):
+def mkjson(data, path, filename):
     with open(os.path.join(path, filename), 'w+', encoding="utf-8") as json_file:
         json.dump(data, json_file, ensure_ascii=False, indent="\t")
