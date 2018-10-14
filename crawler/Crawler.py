@@ -4,22 +4,32 @@ from pyvirtualdisplay import Display
 from selenium import webdriver
 
 class Site:
-    def __init__(self, stemURL):
-        self.stem = stemURL
+    def __init__(self, url):
+        self.stem = url
 
-    def staticGet(url):
-        with requests.session() as s:
-            s.proxies = {}
-            s.proxies['http'] = 'socks5h://localhost:9050'
-            s.proxies['https'] = 'socks5h://localhost:9050'
+    def staticGet(self, session, url):
+        #with requests.session() as s:
+        session.proxies = {}
+        session.proxies['http'] = 'socks5h://localhost:9050'
+        session.proxies['https'] = 'socks5h://localhost:9050'
+        req = session.get(url)
+        html = req.text
+        header = req.headers
+        status = req.status_code
+        soup = bs(html, 'html.parser')
+        return session, req, soup
 
-            req = s.get(url)
-            html = req.text
-            header = req.headers
-            status = req.status_code
-            soup = bs(html, 'html.parser')
-
-        return s, req, soup
+    def staticPost(self, session, url, data):
+        #with requests.session() as s:
+        session.proxies = {}
+        session.proxies['http'] = 'socks5h://localhost:9050'
+        session.proxies['https'] = 'socks5h://localhost:9050'
+        req = session.post(url, data=data)
+        html = req.text
+        header = req.headers
+        status = req.status_code
+        soup = bs(html, 'html.parser')
+        return session, req, soup
 
 
 '''        
