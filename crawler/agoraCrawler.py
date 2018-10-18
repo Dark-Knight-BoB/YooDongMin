@@ -17,7 +17,8 @@ def get_links():
         agora = 'http://c2djzrn6qx6kupkn.onion/'
         with requests.Session() as s:
             agora = cr.Site(agora)
-            s, html = agora.staticGet(s, agora.stem)[0], agora.staticGet(s, agora.stem)[1]
+            tup = agora.staticGet(s, agora.stem)
+            s, html = tup[0], tup[1]
             links = re.compile('href="(\d+\.html)').findall(html.text)
             wf.write(links[-1].strip('.html')+'\n')
     return links[-1]
@@ -37,11 +38,11 @@ def agoraCrawler(new_html):
         #soup=''
         for i in range(new_html+1):
             if i == 0:
-                s, soup = agora.staticGet(s, agora.stem)[0], \
-                          agora.staticGet(s, agora.stem)[2]
+                tup = agora.staticGet(s, agora.stem)
+                s, soup = tup[0], tup[2]
             else:
-                s, soup = agora.staticGet(s, agora.stem + "/{}.html".format(i))[0], \
-                          agora.staticGet(s, agora.stem + "/{}.html".format(i))[2]
+                tup = agora.staticGet(s, agora.stem + "/{}.html".format(i))
+                s, soup = tup[0], tup[2]
             messages = soup.find_all("div", {"class": "message"})
             labels = soup.find_all("label")
             ids = soup.find_all("span", {"class": "reflink"})
@@ -62,11 +63,11 @@ def agoraMultiCrawler(new_html):
         #soup=''
         i = new_html
         if i == 0:
-            s, soup = agora.staticGet(s, agora.stem)[0], \
-                      agora.staticGet(s, agora.stem)[2]
+            tup = agora.staticGet(s, agora.stem)
+            s, soup = tup[0], tup[2]
         else:
-            s, soup = agora.staticGet(s, agora.stem + "/{}.html".format(i))[0], \
-                      agora.staticGet(s, agora.stem + "/{}.html".format(i))[2]
+            tup = agora.staticGet(s, agora.stem + "/{}.html".format(i))
+            s, soup = tup[0], tup[2]
         messages = soup.find_all("div", {"class": "message"})
         labels = soup.find_all("label")
         ids = soup.find_all("span", {"class": "reflink"})
@@ -88,7 +89,7 @@ if __name__=='__main__':
     new_html = compare_number(present_link.strip('.html'), output)
     pool = Pool(processes=4) # 4개의 프로세스를 사용합니다.
     pool.map(agoraMultiCrawler, range(new_html+1)) # get_contetn 함수를 넣어줍시다.
-#    agoraCrawler(new_html)
+ #   agoraCrawler(new_html)
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
