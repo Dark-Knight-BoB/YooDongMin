@@ -73,23 +73,16 @@ if __name__=='__main__':
 
     start_time = time.time()
     print(time.time())
-#    totaldata = []
     highkorea = cr.Site(mainpage)
 
     print(time.time())
-    # present_link = get_links()
-    # new_html = compare_number(present_link.strip('.html'), output)
     session = highkorealogin(LOGIN_INFO, highkorea)[0]
     print(time.time())
     tup = getForums(session, highkorea, highkorea.stem)
-    #print(tup[1])
-#    for forum in tup[2]:
-#        getTitles(tup[0], highkorea, forum)
     s = tup[0]
 
     pool = Pool(processes=4) # 4개의 프로세스를 사용합니다.
     pool.starmap(getTitles, zip(repeat(s), repeat(highkorea), tup[2]))
-#    agoraCrawler(new_html)
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
