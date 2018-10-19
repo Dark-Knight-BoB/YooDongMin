@@ -96,20 +96,12 @@ def getTitles(session, object, forumurl):
                     article['title']=title
                     article['author']=author
                     article['lastup']=unixtime
-                    print(article)
+                    # print(article)
                     data.append(article)
                 except:
                     wf.write(tempTitle.get('href'))
     return data
 
-'''
-
-        contents = soup.find_all("div", {"class": "content"})
-        authors = soup.find_all("a",{"class": "username-coloured"})
-
-        for content in contents:
-            ct = content.get_text()
-'''
 
 
 if __name__=='__main__':
@@ -125,21 +117,21 @@ if __name__=='__main__':
     }
 
     start_time = time.time()
-    print("Trying Login")
+    # print("Trying Login")
     highkorea = cr.Site(mainpage)
     session = highkorealogin(LOGIN_INFO, highkorea)[0]
-    print("--- %s seconds ---" % (time.time() - start_time))
-    print("Getting Forums")
+    # print("--- %s seconds ---" % (time.time() - start_time))
+    # print("Getting Forums")
     tup = getForums(session, highkorea, highkorea.stem)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     session, forumtitles, forumurls = tup[0], tup[1], tup[2]
-    print("Getting Last pages")
+    # print("Getting Last pages")
     tup=getLastPage(session, highkorea, forumtitles, forumurls)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     session, lastpages = tup[0],tup[1]
-    print("Extracting Datas")
+    # print("Extracting Datas")
     pool = Pool(processes=4) # 4개의 프로세스를 사용합니다.
     results = pool.starmap(getTitles, zip(repeat(session), repeat(highkorea), lastpages.values()))
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     cr.mkjson(results, '/home/kyw/json_datas', '20181019_thesis_highkorea.json')
