@@ -5,8 +5,10 @@ import time
 from multiprocessing import Pool
 from itertools import repeat
 from collections import OrderedDict
-
+import re
+import datetime
 #with open('/home/kyw/highkorea/highkoreathesis.txt', 'w') as wf:
+
 def highkorealogin(login_info, object):
     LOGIN_INFO=login_info
     highkorea = object
@@ -21,6 +23,7 @@ def highkorealogin(login_info, object):
         LOGIN_INFO = dict(LOGIN_INFO, **{'sid': sid['value']})
         LOGIN_INFO = dict(LOGIN_INFO, **{'redirect': redirect['value']})
         LOGIN_INFO = dict(LOGIN_INFO, **{'login': login['value']})
+        time.sleep(1)
         s = highkorea.staticPost(s, loginPage, LOGIN_INFO)[0]
     return s, highkorea
     # Main Page
@@ -37,7 +40,7 @@ def getForums(session, object, url):
 
 
 def getLastPage(session, object, forumtitles,  forumurls):
-    lastpages=dict()
+    lastpages=OrderedDict()
     highkorea = object
     s = session
     for title, url in zip(forumtitles, forumurls):
@@ -52,24 +55,44 @@ def getLastPage(session, object, forumtitles,  forumurls):
     return s, lastpages
     # soup.select('#page-body h2 a')
 
-def getContents(session, object, forumurl):
+def getTitles(session, object, forumurl):
+    data = list()
     highkorea = object
     s = session
-    tup = highkorea.staticGet(s, forumurl)
-    s, soup = tup[0], tup[2]
-    titles = soup.find_all("a", {"class": "topictitle"})
-    dates = soup.select(
-        'li.announce dl dd span'
-    )
-    for date in dates:
-        print(date)
-'''
-    for title in titles:
-        titleURL = title.get('href')
-        tup = highkorea.staticGet(s, highkorea.stem + titleURL.strip('.'))
-        lastpg = soup.select(
-            'div.topic-actions div span a'
+    url=re.sub('start=\d+','start=',forumurl)
+    for i in range(0, int(forumurl[-2])+1, 25):
+        tup = highkorea.staticGet(s, highkorea.stem + url.strip('.')+str(i))
+        s, soup = tup[0], tup[2]
+
+        titles = soup.find_all("a", {"class": "topictitle"})
+        dates = soup.find_all("dd", {"class": "lastpost"})
+        authors = soup.select(
+            'li.row dl dt a.username-coloured'
         )
+        datPat=re.compile('\(.\) (?P<month>\d{2}) (?P<day>\d{2}), (?P<year>\d{4}) (?P<hour>\d{1,2}):(?P<minute>\d{2}) (?P<noon>[a-z]{2})')
+
+        for date, tempTitle, tempAuthor in zip([date.text for date in dates if '게시글' not in date.text], titles, authors):
+            article = dict()
+            m = datPat.search(date)
+            year, month, day, hour, minute, noon, unixtime='','','','','','',0
+            if m:
+                month, day, year, hour, minute, noon = m.group("month"),m.group("day"), m.group("year"), m.group("hour"), m.group("minute"),m.group("noon")
+                hour = int(hour) + 12 if noon == 'pm' else int(hour)
+                d = datetime.datetime(int(year),int(month),int(day), hour, int(minute))
+                unixtime = int(time.mktime(d.timetuple()))
+            else:
+                print(date)
+            titleURL = tempTitle.get('href')
+            title = tempTitle.text
+            author = tempAuthor.text
+            article['titleURL']=titleURL
+            article['title']=title
+            article['author']=author
+            article['lastup']=unixtime
+            data.append(article)
+    return data
+
+'''
 
         contents = soup.find_all("div", {"class": "content"})
         authors = soup.find_all("a",{"class": "username-coloured"})
@@ -78,7 +101,6 @@ def getContents(session, object, forumurl):
             ct = content.get_text()
 '''
 
-#http: // highkorea5ou4wcy.onion / viewforum.php?f = 34 & start = 23
 
 if __name__=='__main__':
     loginPage = 'http://highkorea5ou4wcy.onion/ucp.php?mode=login'
@@ -93,19 +115,18 @@ if __name__=='__main__':
     }
 
     start_time = time.time()
-    print("--- %s seconds ---" % time.time())
     highkorea = cr.Site(mainpage)
-
-    print("--- %s seconds ---" % time.time())
     session = highkorealogin(LOGIN_INFO, highkorea)[0]
     print("--- %s seconds ---" % time.time())
     tup = getForums(session, highkorea, highkorea.stem)
     session, forumtitles, forumurls = tup[0], tup[1], tup[2]
     tup=getLastPage(session, highkorea, forumtitles, forumurls)
     session, lastpages = tup[0],tup[1]
-    
-    #pool = Pool(processes=4) # 4개의 프로세스를 사용합니다.
 
-    #pool.starmap(getLastPage, zip(repeat(s), repeat(highkorea), tup[1], tup[2], lastpagelst))
+    pool = Pool(processes=4) # 4개의 프로세스를 사용합니다.
+
+    results = pool.starmap(getTitles, zip(repeat(session), repeat(highkorea), lastpages.values()))
+    outputs = [result[0] for result in results]
+
     print("--- %s seconds ---" % (time.time() - start_time))
-#cr.mkjson(totaldata, '/home/kyw/json_datas', '20181014_thesis_highkorea.json')
+    cr.mkjson(outputs, '/home/kyw/json_datas', '20181019_thesis_highkorea.json')
