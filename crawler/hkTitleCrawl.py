@@ -79,7 +79,7 @@ def getTitles(session, object, forumurl):
             )
             year, month, day, hour, minute, noon, unixtime = '', '', '', '', '', '', 0
             for date, tempTitle, tempAuthor in zip([date.text for date in dates], titles, authors):
-                article = dict()
+                article = OrderedDict()
                 m = datPat.search(date)
                 try:
                     titleURL = tempTitle.get('href')

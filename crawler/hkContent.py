@@ -11,7 +11,7 @@ import hkTitleCrawl as hktc
 
 
 def getContent(session, object, title):
-    return_data = dict()
+    return_data = OrderedDict()
     highkorea = object
     s = session
     topicurl = title['titleURL']
@@ -28,7 +28,7 @@ def getContent(session, object, title):
         else:
             url = lastpage
         content_datas=list()
-        temp_data=dict()
+        temp_data=OrderedDict()
         html_datas=list()
         image_datas = list()
         for i in range(0, num, 10):
@@ -38,14 +38,14 @@ def getContent(session, object, title):
             contents = soup.find_all('div', {'class':'content'})
             images = soup.select('dl.attachbox dd dl dt a img')
             for author, content in zip(authors, contents):
-                content_data=dict()
+                content_data=OrderedDict()
                 for br in content.find_all('br'):
                     br.replace_with('\n')
                 content_data['author']=author.text
                 content_data['content']=content.text
                 content_datas.append(content_data)
             for image in images:
-                image_data = dict()
+                image_data = OrderedDict()
                 image_data['src'] = image.get('src')
                 image_data['name'] = image.get('alt')
                 image_datas.append(image_data)
