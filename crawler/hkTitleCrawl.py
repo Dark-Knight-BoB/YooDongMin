@@ -9,11 +9,11 @@ import re
 import datetime
 #with open('/home/kyw/highkorea/highkoreathesis.txt', 'w') as wf:
 
-def highkorealogin(login_info, object):
+def highkorealogin(login_info, object,loginpage):
     LOGIN_INFO=login_info
     highkorea = object
     with requests.session() as s:
-        tup = highkorea.staticGet(s, loginPage)
+        tup = highkorea.staticGet(s, loginpage)
         s, soup = tup[0], tup[2]
 
         # Login
@@ -24,7 +24,7 @@ def highkorealogin(login_info, object):
         LOGIN_INFO = dict(LOGIN_INFO, **{'redirect': redirect['value']})
         LOGIN_INFO = dict(LOGIN_INFO, **{'login': login['value']})
         time.sleep(1)
-        s = highkorea.staticPost(s, loginPage, LOGIN_INFO)[0]
+        s = highkorea.staticPost(s, loginpage, LOGIN_INFO)[0]
     return s, highkorea
     # Main Page
 
@@ -53,7 +53,8 @@ def getLastPage(session, object, forumtitles,  forumurls):
         lastpage = lastpg[-1].get('href') if lastpg != [] else soup.select('#page-body h2 a')[0].get('href')
         lastpages[title]=lastpage
     return s, lastpages
-    # soup.select('#page-body h2 a')
+
+
 def getTitles(session, object, forumurl):
     with open('/home/kyw/json_datas/1019_error_urls.txt', 'w+', encoding='utf-8') as wf:
         data = list()
@@ -63,7 +64,6 @@ def getTitles(session, object, forumurl):
         num = 1
         datPat = re.compile(
             '\(.\) (?P<month>\d{2}) (?P<day>\d{2}), (?P<year>\d{4}) (?P<hour>\d{1,2}):(?P<minute>\d{2}) (?P<noon>[a-z]{2})')
-
         if m:
             num = int(m.group(1))
             url = re.sub('&start=(\d+)','',forumurl)
@@ -96,7 +96,6 @@ def getTitles(session, object, forumurl):
                     article['title']=title
                     article['author']=author
                     article['lastup']=unixtime
-                    # print(article)
                     data.append(article)
                 except:
                     wf.write(tempTitle.get('href'))
@@ -107,31 +106,19 @@ def getTitles(session, object, forumurl):
 if __name__=='__main__':
     loginPage = 'http://highkorea5ou4wcy.onion/ucp.php?mode=login'
     mainpage = 'http://highkorea5ou4wcy.onion'
-
     ID = 'michin'
     passwd = 'michin'
-
     LOGIN_INFO = {
         'username': ID,
         'password': passwd
     }
-
     start_time = time.time()
-    # print("Trying Login")
     highkorea = cr.Site(mainpage)
-    session = highkorealogin(LOGIN_INFO, highkorea)[0]
-    # print("--- %s seconds ---" % (time.time() - start_time))
-    # print("Getting Forums")
+    session = highkorealogin(LOGIN_INFO, highkorea, loginPage)[0]
     tup = getForums(session, highkorea, highkorea.stem)
-    # print("--- %s seconds ---" % (time.time() - start_time))
     session, forumtitles, forumurls = tup[0], tup[1], tup[2]
-    # print("Getting Last pages")
     tup=getLastPage(session, highkorea, forumtitles, forumurls)
-    # print("--- %s seconds ---" % (time.time() - start_time))
     session, lastpages = tup[0],tup[1]
-    # print("Extracting Datas")
     pool = Pool(processes=4) # 4개의 프로세스를 사용합니다.
     results = pool.starmap(getTitles, zip(repeat(session), repeat(highkorea), lastpages.values()))
-
-    # print("--- %s seconds ---" % (time.time() - start_time))
     cr.mkjson(results, '/home/kyw/json_datas', '20181019_thesis_highkorea.json')
