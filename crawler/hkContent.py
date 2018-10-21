@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, os
 from bs4 import BeautifulSoup as bs
 import Crawler as cr
 import time
@@ -62,6 +62,8 @@ def getContent(session, object, title):
             pass
 
 if __name__=='__main__':
+    tod = datetime.date.today()
+    todstr = tod.isoformat()
     loginPage = 'http://highkorea5ou4wcy.onion/ucp.php?mode=login'
     mainpage = 'http://highkorea5ou4wcy.onion'
     ID = 'michin'
@@ -74,12 +76,12 @@ if __name__=='__main__':
 
     highkorea = cr.Site(mainpage)
     session = hktc.highkorealogin(LOGIN_INFO, highkorea, loginPage)[0]
-    print("-----{} seconds-----".format(time.time()-start_time))
-    with open('/home/kyw/json_datas/highkorea/20181019_thesis_highkorea.json') as f:
+    directory = os.path.join('/home/kyw/json_datas/highkorea/', todstr)
+    filepath = os.path.join(directory, todstr + '_' + 'hkTitle.json')
+    with open(filepath) as f:
         data = json.loads(f.read(), encoding ="utf-8")
         for i, forum in enumerate(data):
             content = list()
             pool = Pool(processes=4)  # 4개의 프로세스를 사용합니다.
             results = pool.starmap(getContent, zip(repeat(session), repeat(highkorea), forum))
-            print("-----{} seconds-----{}".format(time.time() - start_time, i))
-            cr.mkjson(results, '/home/kyw/json_datas/highkorea','{}_hk_181020.json'.format(i))
+            cr.mkjson(results, '/home/kyw/json_datas/highkorea','{}_hkContent.json'.format(i))
