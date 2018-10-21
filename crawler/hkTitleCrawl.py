@@ -121,4 +121,4 @@ if __name__=='__main__':
     session, lastpages = tup[0],tup[1]
     pool = Pool(processes=4) # 4개의 프로세스를 사용합니다.
     results = pool.starmap(getTitles, zip(repeat(session), repeat(highkorea), lastpages.values()))
-    cr.mkjson(results, '/home/kyw/json_datas', '20181019_thesis_highkorea.json')
+    cr.mkjson(results, '/home/kyw/json_datas', 'hkTitle.json')
