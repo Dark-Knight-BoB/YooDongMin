@@ -25,7 +25,7 @@ def highkorealogin(login_info, object,loginpage):
         LOGIN_INFO = dict(LOGIN_INFO, **{'login': login['value']})
         time.sleep(1)
         s = highkorea.staticPost(s, loginpage, LOGIN_INFO)[0]
-    return s, highkorea
+    return s
     # Main Page
 
 def getForums(session, object, url):
@@ -56,54 +56,57 @@ def getLastPage(session, object, forumtitles,  forumurls):
 
 
 def getTitles(session, object, forumurl):
-    with open('/home/kyw/json_datas/1019_error_urls.txt', 'w+', encoding='utf-8') as wf:
-        data = list()
-        highkorea = object
-        s = session
-        m = re.compile('&start=(\d+)').search(forumurl)
-        num = 1
-        datPat = re.compile(
-            '\(.\) (?P<month>\d{2}) (?P<day>\d{2}), (?P<year>\d{4}) (?P<hour>\d{1,2}):(?P<minute>\d{2}) (?P<noon>[a-z]{2})')
-        if m:
-            num = int(m.group(1))
-            url = re.sub('&start=(\d+)','',forumurl)
-        else:
-            url = forumurl
-        for i in range(0, num, 25):
-            tup = highkorea.staticGet(s, highkorea.stem + url.strip('.')+'&start={}'.format(i))
-            s, soup = tup[0], tup[2]
-            titles = soup.find_all("a", {"class": "topictitle"})
-            dates = soup.find_all("dd", {"class": "lastpost"})
-            authors = soup.select(
-                'li.row dl dt a.username-coloured'
-            )
-            year, month, day, hour, minute, noon, unixtime = '', '', '', '', '', '', 0
-            for date, tempTitle, tempAuthor in zip([date.text for date in dates], titles, authors):
-                article = OrderedDict()
-                m = datPat.search(date)
-                try:
-                    titleURL = tempTitle.get('href')
-                    title = tempTitle.text
-                    author = tempAuthor.text
-                    if m:
-                        month, day, year, hour, minute, noon = m.group("month"),m.group("day"), m.group("year"), m.group("hour"), m.group("minute"),m.group("noon")
-                        hour = int(hour) + 12 if noon == 'pm' else int(hour)
-                        d = datetime.datetime(int(year),int(month),int(day), hour, int(minute))
-                        unixtime = int(time.mktime(d.timetuple()))
-                    else:
-                        wf.write(titleURL)
-                    article['titleURL']=titleURL
-                    article['title']=title
-                    article['author']=author
-                    article['lastup']=unixtime
-                    data.append(article)
-                except:
-                    wf.write(tempTitle.get('href'))
+    error_data=list()
+    data = list()
+    highkorea = object
+    s = session
+    m = re.compile('&start=(\d+)').search(forumurl)
+    num = 1
+    datPat = re.compile(
+        '\(.\) (?P<month>\d{2}) (?P<day>\d{2}), (?P<year>\d{4}) (?P<hour>\d{1,2}):(?P<minute>\d{2}) (?P<noon>[a-z]{2})')
+    if m:
+        num = int(m.group(1))
+        url = re.sub('&start=(\d+)','',forumurl)
+    else:
+        url = forumurl
+    for i in range(0, num, 25):
+        tup = highkorea.staticGet(s, highkorea.stem + url.strip('.')+'&start={}'.format(i))
+        s, soup = tup[0], tup[2]
+        titles = soup.find_all("a", {"class": "topictitle"})
+        dates = soup.find_all("dd", {"class": "lastpost"})
+        authors = soup.select(
+            'li.row dl dt a.username-coloured'
+        )
+        year, month, day, hour, minute, noon, unixtime = '', '', '', '', '', '', 0
+        for date, tempTitle, tempAuthor in zip([date.text for date in dates], titles, authors):
+            article = OrderedDict()
+            m = datPat.search(date)
+            try:
+                titleURL = tempTitle.get('href')
+                title = tempTitle.text
+                author = tempAuthor.text
+                if m:
+                    month, day, year, hour, minute, noon = m.group("month"),m.group("day"), m.group("year"), m.group("hour"), m.group("minute"),m.group("noon")
+                    hour = int(hour) + 12 if noon == 'pm' else int(hour)
+                    d = datetime.datetime(int(year),int(month),int(day), hour, int(minute))
+                    unixtime = int(time.mktime(d.timetuple()))
+                else:
+                    error_data.append(titleURL)
+                article['titleURL']=titleURL
+                article['title']=title
+                article['author']=author
+                article['lastup']=unixtime
+                data.append(article)
+            except:
+                error_data.append(tempTitle.get('href'))
+    cr.mkjson(error_data, '/home/kyw/json_datas/highkorea','hkTitle_error.json')
     return data
 
 
 
 if __name__=='__main__':
+    tod = datetime.date.today()
+    todstr = tod.isoformat()
     loginPage = 'http://highkorea5ou4wcy.onion/ucp.php?mode=login'
     mainpage = 'http://highkorea5ou4wcy.onion'
     ID = 'michin'
@@ -114,7 +117,7 @@ if __name__=='__main__':
     }
     start_time = time.time()
     highkorea = cr.Site(mainpage)
-    session = highkorealogin(LOGIN_INFO, highkorea, loginPage)[0]
+    session = highkorealogin(LOGIN_INFO, highkorea, loginPage)
     tup = getForums(session, highkorea, highkorea.stem)
     session, forumtitles, forumurls = tup[0], tup[1], tup[2]
     tup=getLastPage(session, highkorea, forumtitles, forumurls)
