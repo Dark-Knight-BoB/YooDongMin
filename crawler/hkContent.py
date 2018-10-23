@@ -12,6 +12,7 @@ import hkTitleCrawl as hktc
 
 def getContent(session, object, title):
     return_data = OrderedDict()
+    error_data = OrderedDict()
     highkorea = object
     s = session
     topicurl = title['titleURL']
@@ -56,9 +57,10 @@ def getContent(session, object, title):
         return_data[topicurl] = temp_data
         return return_data
     except Exception as e:
-        with open('/home/kyw/json_datas/highkorea/181020_error.txt', 'a') as wf:
-            wf.write(title['titleURL']+'\n')
-            wf.write("{}\n".format(e))
+        with open('/home/kyw/json_datas/highkorea/{}_hkContent_error.txt'.format(todstr), 'a') as wf:
+            error_data[title['titleURL']]=e
+            data = json.dumps(error_data)
+            wf.write("{}\n".format(data))
             pass
 
 if __name__=='__main__':
@@ -84,4 +86,4 @@ if __name__=='__main__':
             content = list()
             pool = Pool(processes=4)  # 4개의 프로세스를 사용합니다.
             results = pool.starmap(getContent, zip(repeat(session), repeat(highkorea), forum))
-            cr.mkjson(results, '/home/kyw/json_datas/highkorea','{}_hkContent.json'.format(i))
+            cr.mkjson(results, '/home/kyw/json_datas/highkorea','{}_hkContent.json'.format(i))#2018-10-21_1_hkContent.json
