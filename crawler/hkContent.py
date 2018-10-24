@@ -57,12 +57,9 @@ def getContent(session, object, title):
         return_data[topicurl] = temp_data
         return return_data
     except Exception as e:
-        with open('/home/kyw/json_datas/highkorea/{}_hkContent_error.txt'.format(todstr), 'a') as wf:
-            error_data[title['titleURL']]=e
-            data = json.dumps(error_data)
-            wf.write("{}\n".format(data))
-            pass
-
+        error_data[title['titleURL']] = e
+        cr.mkjson(error_data, '/home/kyw/json_datas/highkorea', 'hkContent_error.json')
+        pass
 if __name__=='__main__':
     tod = datetime.date.today()
     todstr = tod.isoformat()
