@@ -87,3 +87,12 @@ def mkjson(data, path, filename):
         os.mkdir(new_directory)
     with open(os.path.join(new_directory, todstr + '_' + filename), 'a', encoding="utf-8") as json_file:
         json.dump(data, json_file, ensure_ascii=False, indent="\t")
+
+def mktxt(data, path, filename):
+    tod = datetime.date.today()
+    todstr = tod.isoformat()
+    new_directory = os.path.join(path, todstr)
+    if not os.path.exists(new_directory):
+        os.mkdir(new_directory)
+    with open(os.path.join(new_directory, todstr + '_' + filename), 'a', encoding="utf-8") as wf:
+        wf.write(data)
