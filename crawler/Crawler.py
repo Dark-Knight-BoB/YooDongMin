@@ -20,13 +20,10 @@ class Site:
         session.mount('http://', HTTPAdapter(max_retries=retries))
         req = session.get(url)
         html = req.text
-        # header = req.headers
-        # status = req.status_code
         soup = bs(html, 'html.parser')
         return session, req, soup
 
     def staticPost(self, session, url, data):
-        #with requests.session() as s:
         session.proxies = {}
         session.proxies['http'] = 'socks5h://localhost:9050'
         session.proxies['https'] = 'socks5h://localhost:9050'
@@ -49,34 +46,6 @@ class Site:
 '''
 
 
-# def staticGet(url):
-#     with requests.Session() as s:
-#         s.proxies = {}
-#         s.proxies['http'] = 'socks5h://localhost:9050'
-#         s.proxies['https'] = 'socks5h://localhost:9050'
-#
-#         req = s.get(url)
-#         html = req.text
-#         header = req.headers
-#         status = req.status_code
-#         soup = bs(html, 'html.parser')
-#
-#     return s, req, soup
-#
-#
-# def staticPost(url, data):
-#     with requests.Session() as s:
-#         s.proxies = {}
-#         s.proxies['http'] = 'socks5h://localhost:9050'
-#         s.proxies['https'] = 'socks5h://localhost:9050'
-#
-#         req = s.post(url, data=data)
-#         html = req.text
-#         header = req.headers
-#         status = req.status_code
-#         soup = bs(html, 'html.parser')
-#
-#     return s, soup
 
 
 def mkjson(data, path, filename):

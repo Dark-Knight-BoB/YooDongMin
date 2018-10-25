@@ -18,7 +18,6 @@ font_name = fm.FontProperties(fname=path).get_name()
 f = open('/home/kyw/highkorea/highkorea.txt')
 text = f.read()
 wordcloud = WordCloud().generate(text)
-wordcloud.words_
 plt.figure(figsize=(12,12))
 plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis("off")

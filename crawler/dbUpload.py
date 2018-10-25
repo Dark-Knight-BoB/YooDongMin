@@ -8,6 +8,7 @@ from django.utils import timezone
 import json
 
 if __name__ == '__main__':
+
     with open('/workspace/django_darkknight/json_datas/highkorea/2018-10-20/1_hk_181020.json', 'r') as f:
         data = json.loads(f.read())
         instance = Site(name='highkorea', stem='http://highkorea5ou4wcy.onion', on_off=True,
