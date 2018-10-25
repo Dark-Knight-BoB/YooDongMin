@@ -11,11 +11,15 @@ import hkTitleCrawl as hktc
 
 
 def getContent(session, object, title):
-    return_data = OrderedDict()
     error_data = OrderedDict()
+    return_data = OrderedDict()
+
     highkorea = object
     s = session
     topicurl = title['titleURL']
+    topictitle = title['title']
+    topicauthor = title['author']
+    lastup = title['lastup']
     try:
         tup = highkorea.staticGet(s, highkorea.stem + topicurl.strip('.'))
         s, html, soup = tup[0], tup[1].text, tup[2]
@@ -29,7 +33,6 @@ def getContent(session, object, title):
         else:
             url = lastpage
         content_datas=list()
-        temp_data=OrderedDict()
         html_datas=list()
         image_datas = list()
         for i in range(0, num, 10):
@@ -51,10 +54,14 @@ def getContent(session, object, title):
                 image_data['name'] = image.get('alt')
                 image_datas.append(image_data)
             html_datas.append(html)
-        temp_data['image'] = image_datas
-        temp_data['html'] = html_datas
-        temp_data['content'] = content_datas
-        return_data[topicurl] = temp_data
+        return_data['image'] = image_datas
+        return_data['html'] = html_datas
+        return_data['content'] = content_datas
+        return_data['url'] = topicurl
+        return_data['title'] = topictitle
+        return_data['author'] = topicauthor
+        return_data['lastup'] = lastup
+        # return_data[topicurl] = return_data
         return return_data
     except Exception as e:
         error_data[title['titleURL']] = e
@@ -63,7 +70,7 @@ def getContent(session, object, title):
 if __name__=='__main__':
     tod = datetime.date.today()
     todstr = tod.isoformat()
-    loginPage = 'http://highkorea5ou4wcy.onion/ucp.php?mode=login'
+    loginPage = 'http:Char//highkorea5ou4wcy.onion/ucp.php?mode=login'
     mainpage = 'http://highkorea5ou4wcy.onion'
     ID = 'michin'
     passwd = 'michin'
